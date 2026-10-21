@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "frontend/**"
+      - "scripts/deploy/deploy-frontend.ps1"
       - ".github/workflows/deploy-frontend.yml"
   workflow_dispatch:
 
@@ -14,14 +15,16 @@ permissions:
 
 concurrency:
   group: deploy-frontend
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  # 프론트엔드 Windows 서버 경로
+  HTML_DIR: 'C:\nginx-1.30.5\html'
+  STAGING_DIR: 'C:\Users\test\deploy\frontend'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -34,54 +37,28 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Build frontend
+        working-directory: frontend
         run: |
           npm ci
           npm run build
 
-      - name: Copy built files to server
+      - name: Upload built files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_FRONTEND_HOST }}
           port: ${{ secrets.DEPLOY_FRONTEND_PORT }}
           username: ${{ secrets.DEPLOY_FRONTEND_USER }}
           password: ${{ secrets.DEPLOY_FRONTEND_PASSWORD }}
-          source: "frontend/dist/**"
-          target: "C:\\nginx-1.30.5\\html"
-          strip_components: 2
+          source: "frontend/dist/**,scripts/deploy/deploy-frontend.ps1"
+          target: ${{ env.STAGING_DIR }}
+          rm: true
           overwrite: true
 
-      - name: Copy SPA server to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DEPLOY_FRONTEND_HOST }}
-          port: ${{ secrets.DEPLOY_SSH_PORT }}
-          username: ${{ secrets.DEPLOY_USER }}
-          password: ${{ secrets.DEPLOY_PASSWORD }}
-          source: "frontend/serve.py"
-          target: "~/ai_backend2/frontend"
-          strip_components: 1
-          overwrite: true
-
-      - name: Restart frontend on port 9000
+      - name: Publish to Nginx html folder
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_FRONTEND_HOST }}
-          port: ${{ secrets.DEPLOY_SSH_PORT }}
-          username: ${{ secrets.DEPLOY_USER }}
-          password: ${{ secrets.DEPLOY_PASSWORD }}
-          script: |
-            set -eu
-            cd "$HOME/ai_backend2/frontend"
-            if [ -f frontend.pid ]; then
-              old_pid="$(cat frontend.pid)"
-              if kill -0 "$old_pid" 2>/dev/null && ps -p "$old_pid" -o args= | grep -q '[s]erve.py --bind 0.0.0.0 --port 9000'; then
-                kill "$old_pid"
-                for attempt in $(seq 1 20); do
-                  kill -0 "$old_pid" 2>/dev/null || break
-                  sleep 1
-                done
-              fi
-              rm -f frontend.pid
-            fi
-            nohup python3 serve.py --bind 0.0.0.0 --port 9000 --directory "$HOME/ai_backend2/frontend" > frontend.log 2>&1 < /dev/null &
-            echo $! > frontend.pid
+          port: ${{ secrets.DEPLOY_FRONTEND_PORT }}
+          username: ${{ secrets.DEPLOY_FRONTEND_USER }}
+          password: ${{ secrets.DEPLOY_FRONTEND_PASSWORD }}
+          script: powershell -NoProfile -ExecutionPolicy Bypass -File "${{ env.STAGING_DIR }}\scripts\deploy\deploy-frontend.ps1" -StagingDir "${{ env.STAGING_DIR }}\frontend\dist" -HtmlDir "${{ env.HTML_DIR }}"

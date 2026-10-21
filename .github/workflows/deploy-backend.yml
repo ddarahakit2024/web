@@ -7,6 +7,7 @@ on:
     paths:
       - "app/**"
       - "requirements.txt"
+      - "scripts/deploy/deploy-backend.ps1"
       - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
 
@@ -15,7 +16,13 @@ permissions:
 
 concurrency:
   group: deploy-backend
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  # 백엔드 Windows 서버 경로 (.env, app.db, .venv, certs 는 BACKEND_DIR 에 유지됨)
+  BACKEND_DIR: 'C:\backend'
+  STAGING_DIR: 'C:\Users\test\deploy\backend'
+  BACKEND_PORT: "443"
 
 jobs:
   deploy:
@@ -24,39 +31,24 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Copy backend files to server
+      - name: Upload backend files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_BACKEND_HOST }}
           port: ${{ secrets.DEPLOY_BACKEND_PORT }}
           username: ${{ secrets.DEPLOY_BACKEND_USER }}
           password: ${{ secrets.DEPLOY_BACKEND_PASSWORD }}
-          source: "app/**,requirements.txt"
-          target: "~/ai_backend2"
+          source: "app/**,requirements.txt,scripts/deploy/deploy-backend.ps1"
+          target: ${{ env.STAGING_DIR }}
+          rm: true
           overwrite: true
 
-      - name: Restart backend on port 9100
+      - name: Stop server, replace code, restart
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_BACKEND_HOST }}
           port: ${{ secrets.DEPLOY_BACKEND_PORT }}
           username: ${{ secrets.DEPLOY_BACKEND_USER }}
           password: ${{ secrets.DEPLOY_BACKEND_PASSWORD }}
-          script: |
-            set -eu
-            cd "$HOME/ai_backend2"
-            python3 -m venv .venv
-            .venv/bin/pip install -r requirements.txt
-            if [ -f backend.pid ]; then
-              old_pid="$(cat backend.pid)"
-              if kill -0 "$old_pid" 2>/dev/null && ps -p "$old_pid" -o args= | grep -q '[u]vicorn app.main:app'; then
-                kill "$old_pid"
-                for attempt in $(seq 1 20); do
-                  kill -0 "$old_pid" 2>/dev/null || break
-                  sleep 1
-                done
-              fi
-              rm -f backend.pid
-            fi
-            nohup .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 9100 > backend.log 2>&1 < /dev/null &
-            echo $! > backend.pid
+          command_timeout: 10m
+          script: powershell -NoProfile -ExecutionPolicy Bypass -File "${{ env.STAGING_DIR }}\scripts\deploy\deploy-backend.ps1" -StagingDir "${{ env.STAGING_DIR }}" -BackendDir "${{ env.BACKEND_DIR }}" -Port ${{ env.BACKEND_PORT }}
