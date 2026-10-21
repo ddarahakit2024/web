@@ -1,3 +1,5 @@
+import { baseUrl } from './config.js'
+
 export const KAKAO_STATE_KEY = 'kakao_oauth_state'
 
 async function readApiResult(response) {
@@ -9,7 +11,7 @@ async function readApiResult(response) {
 }
 
 export async function postLogin({ fetchImpl = fetch, apiBaseUrl, path, payload }) {
-  const response = await fetchImpl(`${apiBaseUrl}${path}`, {
+  const response = await fetchImpl(`${baseUrl(apiBaseUrl)}${path}`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -18,8 +20,8 @@ export async function postLogin({ fetchImpl = fetch, apiBaseUrl, path, payload }
   return readApiResult(response)
 }
 
-export async function fetchCurrentUser({ fetchImpl = fetch, apiBaseUrl }) {
-  const response = await fetchImpl(`${apiBaseUrl}/user/me`, { credentials: 'include' })
+export async function fetchCurrentUser({ fetchImpl = fetch, apiBaseUrl } = {}) {
+  const response = await fetchImpl(`${baseUrl(apiBaseUrl)}/user/me`, { credentials: 'include' })
   return readApiResult(response)
 }
 

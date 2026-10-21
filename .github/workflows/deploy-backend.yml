@@ -1,0 +1,62 @@
+name: Deploy backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - "requirements.txt"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Copy backend files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_BACKEND_HOST }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          source: "app/**,requirements.txt"
+          target: "~/ai_backend2"
+          overwrite: true
+
+      - name: Restart backend on port 9100
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_BACKEND_HOST }}
+          port: ${{ secrets.DEPLOY_BACKEND_PORT }}
+          username: ${{ secrets.DEPLOY_BACKEND_USER }}
+          password: ${{ secrets.DEPLOY_BACKEND_PASSWORD }}
+          script: |
+            set -eu
+            cd "$HOME/ai_backend2"
+            python3 -m venv .venv
+            .venv/bin/pip install -r requirements.txt
+            if [ -f backend.pid ]; then
+              old_pid="$(cat backend.pid)"
+              if kill -0 "$old_pid" 2>/dev/null && ps -p "$old_pid" -o args= | grep -q '[u]vicorn app.main:app'; then
+                kill "$old_pid"
+                for attempt in $(seq 1 20); do
+                  kill -0 "$old_pid" 2>/dev/null || break
+                  sleep 1
+                done
+              fi
+              rm -f backend.pid
+            fi
+            nohup .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 9100 > backend.log 2>&1 < /dev/null &
+            echo $! > backend.pid

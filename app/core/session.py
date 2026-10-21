@@ -3,7 +3,12 @@ from sqlalchemy.orm import Session
 import jwt
 
 from app.api.deps import get_db
-from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, JWT_ALGORITHM, JWT_SECRET_KEY
+from app.core.config import (
+    ACCESS_TOKEN_COOKIE_DOMAIN,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    JWT_ALGORITHM,
+    JWT_SECRET_KEY,
+)
 from app.models import KakaoAccount, User
 
 ACCESS_TOKEN_COOKIE = "access_token"
@@ -13,6 +18,7 @@ def set_access_token_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key=ACCESS_TOKEN_COOKIE,
         value=token,
+        domain=ACCESS_TOKEN_COOKIE_DOMAIN,
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         httponly=True,
         secure=True,

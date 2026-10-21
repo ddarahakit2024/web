@@ -7,6 +7,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "development-only-change-me-use-env-in-production")
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+ACCESS_TOKEN_COOKIE_DOMAIN = os.getenv("ACCESS_TOKEN_COOKIE_DOMAIN", "mlops.kro.kr")
 KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY", "")
 KAKAO_CLIENT_SECRET = os.getenv("KAKAO_CLIENT_SECRET", "")
 KAKAO_REDIRECT_URI = os.getenv(

@@ -1,13 +1,14 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { beginKakaoLogin, completeKakaoCallback, postLogin, redirectToMain } from '../api/kakaoAuth.mjs'
+import { baseUrl } from '../api/config.js'
 import { CourseAuthDialog, CoursePageLayout } from '../components/index.js'
 
 const mode = ref('login')
 const loading = ref(false)
 const message = ref('')
 const success = ref(false)
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
+const apiBaseUrl = baseUrl()
 const kakaoRedirectUri = window.location.origin + '/login/kakao/callback'
 
 async function finishKakaoCallback() {

@@ -21,7 +21,11 @@ def create_app(session_factory=SessionLocal, create_schema: bool = True) -> Fast
     application = FastAPI(title="회원 인증 API", lifespan=lifespan)
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://www.mlops.kro.kr",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

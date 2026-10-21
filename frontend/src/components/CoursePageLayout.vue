@@ -5,11 +5,10 @@ import { fetchCurrentUser } from '../api/kakaoAuth.mjs'
 defineProps({ activePage: { type: String, default: 'catalog' } })
 
 const profile = ref(null)
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
 
 onMounted(async () => {
   try {
-    profile.value = await fetchCurrentUser({ apiBaseUrl })
+    profile.value = await fetchCurrentUser()
   } catch {
     profile.value = null
   }

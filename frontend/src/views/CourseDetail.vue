@@ -16,7 +16,6 @@ const purchased = ref(false)
 const purchaseMessage = ref('')
 const purchaseNeedsLogin = ref(false)
 const purchaseError = ref(false)
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || undefined
 const invalidCourseId = computed(() => !Number.isSafeInteger(props.courseId) || props.courseId < 1)
 const pageState = computed(() => getCoursePageState({ loading: loading.value, error: error.value, missing: missing.value, course: course.value, detail: true }))
 const stateView = computed(() => getCourseStateView(pageState.value, true))
@@ -25,17 +24,17 @@ const courseImages = computed(() => course.value?.thumbnail_url ? [{ src: course
 async function loadCourse() {
   if (invalidCourseId.value) { loading.value = false; return }
   loading.value = true; error.value = ''; missing.value = false
-  try { course.value = await fetchCourse(props.courseId, { apiBaseUrl }) } catch (reason) { missing.value = reason?.response?.status === 404; if (!missing.value) error.value = '강의 정보를 불러오지 못했습니다.' } finally { loading.value = false }
+  try { course.value = await fetchCourse(props.courseId) } catch (reason) { missing.value = reason?.response?.status === 404; if (!missing.value) error.value = '강의 정보를 불러오지 못했습니다.' } finally { loading.value = false }
 }
 
 async function buyCourse() {
   if (purchasing.value || purchased.value || !course.value) return
   purchasing.value = true; purchaseMessage.value = ''; purchaseNeedsLogin.value = false; purchaseError.value = false
   try {
-    const order = await createPaymentOrder(course.value.id, { apiBaseUrl })
+    const order = await createPaymentOrder(course.value.id)
     const paymentResult = await launchPortOnePayment(order)
     if (paymentResult?.code !== undefined) { purchaseError.value = true; purchaseMessage.value = paymentResult.message || '결제가 취소되었거나 완료되지 않았습니다.'; return }
-    await confirmPayment(order.payment_id, { apiBaseUrl })
+    await confirmPayment(order.payment_id)
     purchased.value = true; purchaseMessage.value = '구매가 완료되었습니다. 이제 강의를 수강할 수 있습니다.'
   } catch (reason) {
     purchaseError.value = true; purchaseNeedsLogin.value = reason?.response?.status === 401

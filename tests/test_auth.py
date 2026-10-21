@@ -1,6 +1,7 @@
 import json
 import urllib.error
 import urllib.request
+from http.cookies import SimpleCookie
 
 import jwt
 import pytest
@@ -75,15 +76,31 @@ def test_login_sets_http_only_cookie_without_returning_token(client):
     assert response.json()["code"] == 200
     assert response.json()["message"]
     assert "access_token" not in response.text
-    cookie = response.cookies["access_token"]
+    cookie = get_access_token_from_response(response)
     cookie_header = response.headers["set-cookie"].lower()
     assert "httponly" in cookie_header
     assert "samesite=none" in cookie_header
     assert "secure" in cookie_header
     assert "partitioned" in cookie_header
+    assert "domain=mlops.kro.kr" in cookie_header
     claims = jwt.decode(cookie, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     assert claims["sub"] == "1"
     assert "exp" in claims
+
+
+def test_cors_allows_production_frontend_with_credentials(client):
+    test_client, _ = client
+    response = test_client.options(
+        "/user/login",
+        headers={
+            "Origin": "https://www.mlops.kro.kr",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://www.mlops.kro.kr"
+    assert response.headers["access-control-allow-credentials"] == "true"
 
 
 def test_current_user_returns_profile_from_http_only_cookie(client):
@@ -95,7 +112,9 @@ def test_current_user_returns_profile_from_http_only_cookie(client):
     login = test_client.post(
         "/user/login", json={"email": "person@example.com", "password": "secure-pass-123"}
     )
-    response = test_client.get("/user/me", headers={"cookie": f"access_token={login.cookies['access_token']}"})
+    response = test_client.get(
+        "/user/me", headers={"cookie": f"access_token={get_access_token_from_response(login)}"}
+    )
     assert response.status_code == 200
     assert response.json()["result"] == {"name": "Person", "provider": "local"}
 
@@ -152,10 +171,12 @@ def test_kakao_login_sets_http_only_cookie_without_returning_token(client, monke
     response = test_client.post("/user/kakao/login", json={"code": "authorization-code"})
     assert response.status_code == 200
     assert "access_token" not in response.text
-    cookie = response.cookies["access_token"]
+    cookie = get_access_token_from_response(response)
     claims = jwt.decode(cookie, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     assert claims["sub"] == "kakao:123456789"
-    profile = test_client.get("/user/me", headers={"cookie": f"access_token={response.cookies['access_token']}"})
+    profile = test_client.get(
+        "/user/me", headers={"cookie": f"access_token={get_access_token_from_response(response)}"}
+    )
     assert profile.status_code == 200
     assert profile.json()["result"] == {"name": "Moa", "provider": "kakao"}
 
@@ -238,7 +259,7 @@ def test_kakao_login_does_not_store_or_return_email(client, monkeypatch):
     response = test_client.post("/user/kakao/login", json={"code": "authorization-code"})
     assert response.status_code == 200
     assert "access_token" not in response.text
-    assert response.cookies.get("access_token")
+    assert get_access_token_from_response(response)
     from app.models.kakao_account import KakaoAccount
     with test_session() as db:
         account = db.query(KakaoAccount).one()
@@ -267,3 +288,9 @@ def install_kakao_api(monkeypatch, profiles):
             return FakeKakaoResponse(remaining_profiles.pop(0))
         raise AssertionError(f"Unexpected Kakao endpoint: {request.full_url}")
     monkeypatch.setattr(kakao, "urlopen", fake_urlopen)
+
+
+def get_access_token_from_response(response):
+    cookies = SimpleCookie()
+    cookies.load(response.headers["set-cookie"])
+    return cookies["access_token"].value

@@ -9,7 +9,6 @@ const loading = ref(true)
 const error = ref('')
 const keyword = ref('')
 const category = ref('')
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || undefined
 const categories = computed(() => [...new Set(courses.value.map((course) => course.category).filter(Boolean))])
 const filteredCourses = computed(() => courses.value.filter((course) => {
   const query = keyword.value.trim().toLocaleLowerCase()
@@ -23,7 +22,7 @@ const stateView = computed(() => getCourseStateView(pageState.value))
 async function loadCourses() {
   loading.value = true
   error.value = ''
-  try { courses.value = await fetchCourses({ apiBaseUrl }) } catch { error.value = '강의 목록을 불러오지 못했습니다.' } finally { loading.value = false }
+  try { courses.value = await fetchCourses() } catch { error.value = '강의 목록을 불러오지 못했습니다.' } finally { loading.value = false }
 }
 
 function search(criteria) { keyword.value = criteria.keyword; category.value = criteria.category }
