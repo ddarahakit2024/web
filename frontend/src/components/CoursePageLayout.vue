@@ -22,7 +22,7 @@ onMounted(async () => {
         <span class="academy-brand__mark" aria-hidden="true">M</span><span>MOA <b>Academy</b></span>
       </a>
       <nav class="academy-nav" aria-label="주요 메뉴">
-        <a href="/courses" :aria-current="activePage === 'catalog' ? 'page' : undefined">강의 찾기</a>
+        <a href="/courses" :aria-current="activePage === 'catalog' ? 'page' : undefined">전체 강의</a>
         <a href="/courses" :aria-current="activePage === 'detail' ? 'page' : undefined">내 학습</a>
       </nav>
       <a v-if="!profile" class="academy-account" href="/login">로그인 <span aria-hidden="true">↗</span></a>
