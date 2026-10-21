@@ -7,6 +7,12 @@ from app.schemas.course import CourseDetailResponse, CourseListResponse
 
 router = APIRouter(prefix="/courses", tags=["courses"])
 
+@router.get("/test")
+def list_courses():
+    return {"zzz": status.HTTP_200_OK}
+
+
+
 
 @router.get("", response_model=CourseListResponse)
 def list_courses(db: Session = Depends(get_db)):
