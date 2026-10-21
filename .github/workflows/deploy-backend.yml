@@ -40,7 +40,6 @@ jobs:
           password: ${{ secrets.DEPLOY_BACKEND_PASSWORD }}
           source: "app/**,requirements.txt,scripts/deploy/deploy-backend.ps1"
           target: ${{ env.STAGING_DIR }}
-          rm: true
           overwrite: true
 
       - name: Stop server, replace code, restart

@@ -18,5 +18,7 @@ New-Item -ItemType Directory -Force -Path $HtmlDir | Out-Null
 if ($LASTEXITCODE -ge 8) {
     throw "robocopy failed with exit code $LASTEXITCODE"
 }
+# 다음 업로드에 이전 파일이 섞이지 않도록 업로드 폴더 정리 (StagingDir = <업로드 폴더>\frontend\dist)
+Remove-Item (Split-Path (Split-Path $StagingDir -Parent) -Parent) -Recurse -Force
 Write-Host "Frontend deployed to $HtmlDir"
 exit 0

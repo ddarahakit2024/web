@@ -59,6 +59,8 @@ if (Test-Path $appDir) {
 }
 Copy-Item (Join-Path $StagingDir "app") $appDir -Recurse -Force
 Copy-Item (Join-Path $StagingDir "requirements.txt") (Join-Path $BackendDir "requirements.txt") -Force
+# 다음 업로드에 이전 파일이 섞이지 않도록 업로드 폴더 정리
+Remove-Item $StagingDir -Recurse -Force
 
 # 3. 가상환경 및 의존성
 $venvPython = Join-Path $BackendDir ".venv\Scripts\python.exe"
