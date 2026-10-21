@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.DEPLOY_FRONTEND_USER }}
           password: ${{ secrets.DEPLOY_FRONTEND_PASSWORD }}
           source: "frontend/dist/**"
-          target: "C:/nginx-1.30.5/html"
+          target: "C:\\nginx-1.30.5\\html"
           strip_components: 2
           overwrite: true
 
@@ -54,9 +54,9 @@ jobs:
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_FRONTEND_HOST }}
-          port: ${{ secrets.DEPLOY_FRONTEND_PORT }}
-          username: ${{ secrets.DEPLOY_FRONTEND_USER }}
-          password: ${{ secrets.DEPLOY_FRONTEND_PASSWORD }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
           source: "frontend/serve.py"
           target: "~/ai_backend2/frontend"
           strip_components: 1
@@ -66,9 +66,9 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_FRONTEND_HOST }}
-          port: ${{ secrets.DEPLOY_FRONTEND_PORT }}
-          username: ${{ secrets.DEPLOY_FRONTEND_USER }}
-          password: ${{ secrets.DEPLOY_FRONTEND_PASSWORD }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
           script: |
             set -eu
             cd "$HOME/ai_backend2/frontend"
