@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Developer"
+  short_description: "Implement FastAPI APIs with pytest coverage"
+  default_prompt: "Use $api-devloper to implement an API in app/ and add pytest coverage."

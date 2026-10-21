@@ -1,0 +1,17 @@
+프로젝트 구조
+app/
+├── main.py        # 앱 생성 · 라우터 등록
+├── core/          # 설정 · 보안 도구
+│   ├── config.py
+│   └── security.py
+├── db/
+│   └── database.py  # DB 연결 · 세션
+├── models/        # DB 테이블
+│   └── user.py
+├── schemas/       # 요청 · 응답 모양
+│   └── user.py
+└── api/
+    ├── deps.py    # 공통 의존성
+    └── routers/   # 경로 함수
+        ├── auth.py
+        └── users.py

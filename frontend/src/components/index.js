@@ -1,0 +1,7 @@
+export { default as CourseAuthDialog } from './CourseAuthDialog.vue'
+export { default as CourseGallery } from './CourseGallery.vue'
+export { default as CourseGrid } from './CourseGrid.vue'
+export { default as CoursePageLayout } from './CoursePageLayout.vue'
+export { default as CoursePurchaseCard } from './CoursePurchaseCard.vue'
+export { default as CourseSearchBar } from './CourseSearchBar.vue'
+export { default as CourseSummary } from './CourseSummary.vue'
