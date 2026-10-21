@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.DEPLOY_FRONTEND_USER }}
           password: ${{ secrets.DEPLOY_FRONTEND_PASSWORD }}
           source: "frontend/dist/**"
-          target: "C:\nginx-1.30.5\html"
+          target: "C:\\nginx-1.30.5\\html"
           strip_components: 2
           overwrite: true
 
