@@ -10,11 +10,14 @@
 | --- | --- |
 | `DEPLOY_BACKEND_HOST` | 백엔드 서버 SSH 주소 |
 | `DEPLOY_FRONTEND_HOST` | 프론트엔드 서버 SSH 주소 |
-| `DEPLOY_SSH_PORT` | SSH 데몬 포트 번호 |
-| `DEPLOY_USER` | 서버 SSH 계정 |
-| `DEPLOY_PASSWORD` | 해당 계정의 SSH 비밀번호 |
+| `DEPLOY_BACKEND_PORT` | 백엔드 서버 SSH 포트 |
+| `DEPLOY_BACKEND_USER` | 백엔드 서버 SSH 계정 |
+| `DEPLOY_BACKEND_PASSWORD` | 백엔드 서버 SSH 비밀번호 |
+| `DEPLOY_FRONTEND_PORT` | 프론트엔드 서버 SSH 포트 |
+| `DEPLOY_FRONTEND_USER` | 프론트엔드 서버 SSH 계정 |
+| `DEPLOY_FRONTEND_PASSWORD` | 프론트엔드 서버 SSH 비밀번호 |
 
-`DEPLOY_SSH_PORT`는 SSH 접속 포트입니다. 서비스는 별도로 백엔드 `9100`, 프론트엔드 `9000` 포트를 사용합니다. 서버 방화벽에서 서비스 포트도 허용해야 합니다.
+두 `*_PORT` 값은 각 서버의 SSH 접속 포트입니다. 서비스는 별도로 백엔드 `9100`, 프론트엔드 `9000` 포트를 사용합니다. 서버 방화벽에서 서비스 포트도 허용해야 합니다.
 
 ## 서버 준비
 
