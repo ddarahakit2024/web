@@ -51,7 +51,6 @@ jobs:
           password: ${{ secrets.DEPLOY_FRONTEND_PASSWORD }}
           source: "frontend/dist/**,scripts/deploy/deploy-frontend.ps1"
           target: ${{ env.STAGING_DIR }}
-          overwrite: true
 
       - name: Publish to Nginx html folder
         uses: appleboy/ssh-action@v1.2.0
