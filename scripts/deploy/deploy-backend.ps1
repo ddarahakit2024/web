@@ -1,4 +1,4 @@
-# GitHub Actions가 SSH로 백엔드 Windows 서버에서 실행하는 배포 스크립트.
+﻿# GitHub Actions가 SSH로 백엔드 Windows 서버에서 실행하는 배포 스크립트.
 # 기존 Uvicorn 종료 -> 코드 교체 -> 의존성 설치 -> Uvicorn 재시작 순서로 동작한다.
 param(
     [Parameter(Mandatory = $true)][string]$StagingDir,

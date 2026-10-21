@@ -1,4 +1,4 @@
-# GitHub Actions가 SSH로 프론트엔드 Windows 서버에서 실행하는 배포 스크립트.
+﻿# GitHub Actions가 SSH로 프론트엔드 Windows 서버에서 실행하는 배포 스크립트.
 # 업로드된 빌드 결과물을 Nginx html 폴더에 반영한다. 정적 파일이라 Nginx 재시작은 필요 없다.
 param(
     [Parameter(Mandatory = $true)][string]$StagingDir,
